@@ -1,4 +1,5 @@
 #container {
+  display: flex;
   position: absolute;
   left: 50%;
   top: 50%;
@@ -13,15 +14,15 @@
 
 .sec {
   display: flex;
-  width: 100%;
-  height: 50%;
+  width: 50%;
+  height: 100%;
   justify-content: center;
   align-items: center;
   flex-direction: column;
 }
 
 .sec:first-child {
-  border-bottom: 1px solid black;
+  border-right: 1px solid black;
 }
 
 #searchBar {
@@ -33,19 +34,21 @@
 #selectContainer {
   width: 95%;
   height: 85%;
+
+  overflow: scroll;
+  overflow: hidden;
+  overflow-y: scroll;
+  scrollbar-width: none;
+}
+
+#selectContainer table {
+  width: 100%;
 }
 
 table {
   font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
-  width: 100%;
-}
-
-table tbody {
-  overflow: scroll;
-
-  overflow: hidden;
-  overflow-y: scroll;
-  scrollbar-width: none;
+  width: 95%;
+  user-select: none;
 }
 
 table tbody::-webkit-scrollbar {
@@ -64,7 +67,43 @@ td {
   text-align: center;
 }
 
+th.codigo,
+td.codigo {
+  width: 15%;
+}
+
+th.examen,
+td.examen {
+  width: 45%;
+}
+
+td.examen {
+  text-align: left;
+}
+
+th.fonasa,
+td.fonasa {
+  width: 15%;
+}
+
+th.particular,
+td.particular {
+  width: 20%;
+}
+
 th {
   background-color: #04aa6d;
   color: white;
+}
+
+tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+#selectContainer table tr {
+  cursor: pointer;
+}
+
+#selectContainer table tr:hover {
+  background-color: #d0f2fa;
 }
