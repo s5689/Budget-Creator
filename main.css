@@ -107,3 +107,37 @@ tr:nth-child(even) {
 #selectContainer table tr:hover {
   background-color: #d0f2fa;
 }
+
+#details {
+  display: flex;
+  position: fixed;
+  bottom: -160px;
+  left: 50%;
+  align-items: center;
+  flex-direction: column;
+
+  width: 95%;
+  height: 140px;
+
+  background-color: white;
+  border: 1px solid black;
+  border-radius: 1rem 1rem 0 0;
+  box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.7);
+
+  transform: translateX(-50%);
+  transition: bottom 250ms;
+
+  z-index: 10;
+}
+
+#details[show] {
+  bottom: -10px;
+}
+
+#details table {
+  width: 95%;
+}
+
+#details tbody td {
+  border: 1px solid black;
+}
