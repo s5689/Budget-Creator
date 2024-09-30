@@ -141,3 +141,54 @@ tr:nth-child(even) {
 #details tbody td {
   border: 1px solid black;
 }
+
+#budgetContainer {
+  width: 100%;
+  height: 90%;
+
+  overflow: scroll;
+  overflow: hidden;
+  overflow-y: scroll;
+  scrollbar-width: none;
+}
+
+#budgetContainer table {
+  width: 100%;
+}
+
+#budgetContainer td {
+  border: 1px solid black;
+  border-top: none;
+  border-left: none;
+}
+
+#budgetContainer td:last-child {
+  border-right: none;
+}
+
+#budgetContainer table tr {
+  cursor: pointer;
+}
+
+#budgetContainer table tr:hover {
+  background-color: #ffe8e8;
+}
+
+#budgetBottom {
+  font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
+  display: flex;
+
+  width: 100%;
+  height: 10%;
+
+  border-top: 1px solid black;
+}
+
+#budgetBottom #payType {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+
+  padding: 0 1rem 0 1rem;
+  border-right: 1px solid black;
+}

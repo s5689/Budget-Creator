@@ -4,8 +4,29 @@ const searchBar = document.getElementById("searchBar");
 const resultsHTML = document.querySelector("#selectContainer table");
 const detailsHTML = document.getElementById("details");
 const detailsTableHTML = document.querySelector("#details tbody");
+const budgetTableHTML = document.querySelector("#budgetContainer table");
 
-const currentBudget = [];
+const currentBudget = {
+  list: [],
+  type: "fonasa",
+  callback: () => {},
+
+  add(e) {
+    if (typeof this.list.find((value) => value === e) === "undefined") {
+      this.list.push(e);
+      this.callback(e, this.list);
+    }
+  },
+
+  remove(e) {
+    this.list = this.list.filter((value) => value !== e);
+    this.callback(e, this.list);
+  },
+
+  onChange(e) {
+    this.callback = e;
+  },
+};
 
 // Search Bar Event
 searchBar.addEventListener("keyup", () => {
@@ -61,42 +82,81 @@ searchBar.addEventListener("keyup", () => {
 document.addEventListener("contextmenu", (e) => {
   const currentRow = e.srcElement.parentElement;
 
-  try {
-    // Proceder si el click fue dentro de la lista
-    if (checkClick(e)) {
-      e.preventDefault();
-      detailsHTML.setAttribute("show", "");
+  // Proceder si el click fue dentro de la lista
+  if (checkResultsClick(e)) {
+    e.preventDefault();
+    detailsHTML.setAttribute("show", "");
 
-      const rowID = currentRow.getAttribute("id");
-      let txt = "<tr>";
+    const rowID = currentRow.getAttribute("id");
+    let txt = "<tr>";
 
-      // Recorrer los datos seleccionados
-      Object.values(db[rowID]).forEach((value, k) => {
-        let tempValue = value;
+    // Recorrer los datos seleccionados
+    Object.values(db[rowID]).forEach((value, k) => {
+      let tempValue = value;
 
-        // Dar formato a los Precios
-        if (k === 3 || k === 4) {
-          tempValue = toFormat(value);
-        }
+      // Dar formato a los Precios
+      if (k === 3 || k === 4) {
+        tempValue = toFormat(value);
+      }
 
-        txt += `<td>${tempValue}</td>`;
-      });
+      txt += `<td>${tempValue}</td>`;
+    });
 
-      txt += "</tr>";
+    txt += "</tr>";
 
-      detailsTableHTML.innerHTML = txt;
-    }
-  } catch (error) {}
+    detailsTableHTML.innerHTML = txt;
+  }
 });
 
+// Al dar click
 document.addEventListener("click", (e) => {
   // Hide details
   detailsHTML.removeAttribute("show");
 
-  if (checkClick(e)) {
+  // Si el click sucede en la lista de examenes
+  if (checkResultsClick(e)) {
     const rowID = e.srcElement.parentElement.getAttribute("id");
-    console.log(rowID);
+    currentBudget.add(rowID);
   }
+
+  // Si el click sucede en la lista de presupuestos
+  if (checkBudgetClick(e)) {
+    const rowID = e.srcElement.parentElement.getAttribute("id");
+    currentBudget.remove(rowID);
+  }
+});
+
+// Al realizar cambios en la lista de presupuestos
+currentBudget.onChange((e, list) => {
+  let txt = "";
+  currentBudget.list.forEach((value) => {
+    const currentItem = db[value];
+    let asFonasa = false;
+    let type = "";
+    let price = "";
+
+    if (currentItem["Copago FNS"] !== "") {
+      asFonasa = true;
+    }
+
+    if (currentBudget.type === "fonasa" && asFonasa) {
+      type = "F";
+      price = toFormat(currentItem["Copago FNS"]);
+    } else {
+      type = "P";
+      price = toFormat(currentItem.PART);
+    }
+
+    txt += `
+      <tr id="${value}">
+        <td style="width: 5%">${type}</td>
+        <td style="width: 75%;text-align: left;">${currentItem.EXAMEN}</td>
+        <td style="width: 20%">${price}</td>
+      </tr>
+    `;
+  });
+
+  budgetTableHTML.innerHTML = txt;
 });
 
 function toFormat(e) {
@@ -141,12 +201,30 @@ function toFormat(e) {
   return result;
 }
 
-function checkClick(e) {
-  const currentRow = e.srcElement.parentElement;
+function checkResultsClick(e) {
+  try {
+    const currentRow = e.srcElement.parentElement;
 
-  if (currentRow.parentElement.parentElement.parentElement.getAttribute("id") === "selectContainer") {
-    return true;
+    if (currentRow.parentElement.parentElement.parentElement.getAttribute("id") === "selectContainer") {
+      return true;
+    }
+
+    return false;
+  } catch (error) {
+    return false;
   }
+}
 
-  return false;
+function checkBudgetClick(e) {
+  try {
+    const currentRow = e.srcElement.parentElement;
+
+    if (currentRow.parentElement.parentElement.parentElement.getAttribute("id") === "budgetContainer") {
+      return true;
+    }
+
+    return false;
+  } catch (error) {
+    return false;
+  }
 }
