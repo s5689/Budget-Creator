@@ -174,6 +174,10 @@ tr:nth-child(even) {
   background-color: #ffe8e8;
 }
 
+#budgetContainer table tr:first-child td:last-child {
+  border-radius: 0 1rem 0 0;
+}
+
 #budgetBottom {
   font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
   display: flex;
@@ -188,7 +192,35 @@ tr:nth-child(even) {
   display: flex;
   justify-content: center;
   flex-direction: column;
+  min-width: calc(56px + 2rem);
 
   padding: 0 1rem 0 1rem;
   border-right: 1px solid black;
+}
+
+#budgetBottom #payTotal {
+  display: flex;
+  align-items: center;
+  width: 100%;
+
+  padding: 0 1rem 0 1rem;
+  border-right: 1px solid black;
+}
+
+#budgetBottom #budgetPrint {
+  display: flex;
+  align-items: center;
+
+  border-radius: 0 0 1rem 0;
+  cursor: pointer;
+  user-select: none;
+}
+
+#budgetBottom #budgetPrint:hover {
+  background-color: #fffcd8;
+}
+
+#budgetBottom #budgetPrint img {
+  height: 50%;
+  padding: 0 1.5rem 0 1.5rem;
 }

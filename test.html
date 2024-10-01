@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Clinica Provincia de Petorca</title>
+
+    <style>
+      * {
+        font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
+      }
+
+      body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      #title {
+        text-align: center;
+
+        width: 80%;
+        border-bottom: 1px solid black;
+      }
+
+      table {
+        width: 80%;
+      }
+
+      table,
+      th,
+      td {
+        border-collapse: collapse;
+      }
+
+      th {
+        background-color: #04aa6d;
+        color: white;
+      }
+
+      tr:nth-child(even) {
+        background-color: #f2f2f2;
+      }
+
+      tbody tr td:last-child {
+        text-align: right;
+      }
+
+      tbody tr:last-child {
+        background-color: white;
+      }
+
+      tbody tr:last-child td:last-child {
+        font-size: x-large;
+        font-weight: bold;
+        border-top: 2px solid black;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1 id="title">Presupuesto</h1>
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 80%">Examen</th>
+          <th style="width: 20%">Precio</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>a</td>
+          <td>$5000</td>
+        </tr>
+        <tr>
+          <td>a</td>
+          <td>$5000</td>
+        </tr>
+        <tr>
+          <td>a</td>
+          <td>$5000</td>
+        </tr>
+        <tr>
+          <td>a</td>
+          <td>$5000</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>$5000</td>
+        </tr>
+      </tbody>
+    </table>
+  </body>
+</html>

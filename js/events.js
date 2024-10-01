@@ -5,26 +5,38 @@ const resultsHTML = document.querySelector("#selectContainer table");
 const detailsHTML = document.getElementById("details");
 const detailsTableHTML = document.querySelector("#details tbody");
 const budgetTableHTML = document.querySelector("#budgetContainer table");
+const payTypeHTML = document.querySelector("#budgetBottom #payType");
+const payTotalHTML = document.querySelector("#budgetBottom #payTotal h1");
+const printButton = document.getElementById("budgetPrint");
 
 const currentBudget = {
   list: [],
-  type: "fonasa",
+  _type: "fonasa",
   callback: () => {},
 
   add(e) {
     if (typeof this.list.find((value) => value === e) === "undefined") {
       this.list.push(e);
-      this.callback(e, this.list);
+      this.callback();
     }
   },
 
   remove(e) {
     this.list = this.list.filter((value) => value !== e);
-    this.callback(e, this.list);
+    this.callback();
   },
 
   onChange(e) {
     this.callback = e;
+  },
+
+  get type() {
+    return this._type;
+  },
+
+  set type(e) {
+    this._type = e;
+    this.callback();
   },
 };
 
@@ -57,6 +69,9 @@ searchBar.addEventListener("keyup", () => {
         // O si el codigo coincide, mostrar en la lista
       } else if (e.CODIGO.includes(currentValue)) {
         return true;
+        // O si la observacion coincide, mostrar en la lista
+      } else if (e.OBSERVACIONES.toLowerCase().includes(currentValue)) {
+        return true;
       }
 
       return false;
@@ -83,7 +98,7 @@ document.addEventListener("contextmenu", (e) => {
   const currentRow = e.srcElement.parentElement;
 
   // Proceder si el click fue dentro de la lista
-  if (checkResultsClick(e)) {
+  if (checkResultsClick(e) || checkBudgetClick(e)) {
     e.preventDefault();
     detailsHTML.setAttribute("show", "");
 
@@ -127,8 +142,10 @@ document.addEventListener("click", (e) => {
 });
 
 // Al realizar cambios en la lista de presupuestos
-currentBudget.onChange((e, list) => {
+currentBudget.onChange(() => {
   let txt = "";
+  let total = 0;
+
   currentBudget.list.forEach((value) => {
     const currentItem = db[value];
     let asFonasa = false;
@@ -141,22 +158,132 @@ currentBudget.onChange((e, list) => {
 
     if (currentBudget.type === "fonasa" && asFonasa) {
       type = "F";
-      price = toFormat(currentItem["Copago FNS"]);
+      price = currentItem["Copago FNS"];
     } else {
       type = "P";
-      price = toFormat(currentItem.PART);
+      price = currentItem.PART;
     }
+
+    total += Number(price);
 
     txt += `
       <tr id="${value}">
         <td style="width: 5%">${type}</td>
         <td style="width: 75%;text-align: left;">${currentItem.EXAMEN}</td>
-        <td style="width: 20%">${price}</td>
+        <td style="width: 20%">${toFormat(price)}</td>
       </tr>
     `;
   });
 
   budgetTableHTML.innerHTML = txt;
+  payTotalHTML.innerHTML = toFormat(String(total));
+});
+
+// Cambio al tipo de pago
+payTypeHTML.addEventListener("change", (e) => {
+  currentBudget.type = e.srcElement.id;
+});
+
+// Imprimir Presupuesto
+printButton.addEventListener("click", () => {
+  if (currentBudget.list.length !== 0) {
+    let txt = "";
+
+    // Recorrer todo el presupuesto actual
+    for (let k = 0; k < currentBudget.list.length; k++) {
+      const currentRow = budgetTableHTML.children[0].children[k];
+
+      txt += `
+        <tr>
+          <td>${currentRow.children[1].innerHTML}</td>
+          <td>${currentRow.children[2].innerHTML}</td>
+        </tr>
+      `;
+    }
+
+    const printPage = window.open();
+
+    printPage.document.write(`
+      <!DOCTYPE html>
+      <html lang="es">
+        <head>
+          <meta charset="UTF-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+          <title>Clinica Provincia de Petorca</title>
+
+          <style>
+            * {
+              font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
+            }
+
+            body {
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+            }
+
+            #title {
+              border-bottom
+            }
+
+            table {
+              width: 80%;
+            }
+
+            table,
+            th,
+            td {
+              border-collapse: collapse;
+            }
+
+            th {
+              background-color: #04aa6d;
+              color: white;
+            }
+
+            tr:nth-child(even) {
+              background-color: #f2f2f2;
+            }
+
+            tbody tr td:last-child {
+              text-align: center;
+            }
+
+            tbody tr:last-child {
+              background-color: white;
+            }
+
+            tbody tr:last-child td:last-child {
+              font-size: larger;
+              font-weight: bold;
+              border-top: 2px solid black;
+            }
+          </style>
+        </head>
+
+        <body>
+          <h1 id="title">Presupuesto</h1>
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 80%">Examen</th>
+                <th style="width: 20%">Precio</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${txt}
+              <tr>
+                <td></td>
+                <td>${payTotalHTML.innerHTML}</td>
+              </tr>
+            </tbody>
+          </table>
+        </body>
+      </html>
+    `);
+    printPage.print();
+    printPage.close();
+  }
 });
 
 function toFormat(e) {
