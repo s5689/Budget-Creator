@@ -1,6 +1,7 @@
 import { db } from "./db";
 
 const searchBar = document.getElementById("searchBar");
+const wipeBudgetButton = document.getElementById("wipeBudget");
 const resultsHTML = document.querySelector("#selectContainer table");
 const detailsHTML = document.getElementById("details");
 const detailsTableHTML = document.querySelector("#details tbody");
@@ -23,6 +24,11 @@ const currentBudget = {
 
   remove(e) {
     this.list = this.list.filter((value) => value !== e);
+    this.callback();
+  },
+
+  wipe() {
+    this.list = [];
     this.callback();
   },
 
@@ -91,6 +97,13 @@ searchBar.addEventListener("keyup", () => {
   });
 
   resultsHTML.innerHTML = txt;
+});
+
+// Wipe Budget
+wipeBudgetButton.addEventListener("click", () => {
+  currentBudget.wipe();
+  searchBar.value = "";
+  resultsHTML.innerHTML = "";
 });
 
 // Details Right Click
@@ -214,6 +227,7 @@ printButton.addEventListener("click", () => {
           <style>
             * {
               font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
+              -webkit-print-color-adjust: exact !important;
             }
 
             body {
@@ -223,7 +237,10 @@ printButton.addEventListener("click", () => {
             }
 
             #title {
-              border-bottom
+              text-align: center;
+
+              width: 80%;
+              border-bottom: 1px solid black;
             }
 
             table {
@@ -246,7 +263,7 @@ printButton.addEventListener("click", () => {
             }
 
             tbody tr td:last-child {
-              text-align: center;
+              text-align: right;
             }
 
             tbody tr:last-child {
@@ -254,7 +271,7 @@ printButton.addEventListener("click", () => {
             }
 
             tbody tr:last-child td:last-child {
-              font-size: larger;
+              font-size: x-large;
               font-weight: bold;
               border-top: 2px solid black;
             }
@@ -264,7 +281,6 @@ printButton.addEventListener("click", () => {
         <body>
           <h1 id="title">Presupuesto</h1>
           <table>
-            <thead>
               <tr>
                 <th style="width: 80%">Examen</th>
                 <th style="width: 20%">Precio</th>
