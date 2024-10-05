@@ -47,7 +47,7 @@ const currentBudget = {
 };
 
 // Search Bar Event
-searchBar.addEventListener("keyup", () => {
+searchBar.addEventListener("keyup", (e) => {
   const currentValue = searchBar.value;
   const foundList = [];
 
@@ -66,6 +66,14 @@ searchBar.addEventListener("keyup", () => {
         });
       }
     });
+
+    // Al presionar Enter en la barra de Busqueda
+    // Agregar el elemento encontrado y borrar la barra de busqueda
+    if (e.key === "Enter" && foundList.length === 1) {
+      resultsHTML.children[0].children[0].children[0].click();
+      searchBar.value = "";
+      foundList.pop(0);
+    }
 
     function checkValue(e) {
       // Si el nombre del examen coincide
