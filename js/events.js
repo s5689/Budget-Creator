@@ -16,14 +16,24 @@ const currentBudget = {
   callback: () => {},
 
   add(e) {
+    let ok;
+
     if (typeof this.list.find((value) => value === e) === "undefined") {
+      ok = true;
+    } else {
+      if (confirm("El examen ya fue agregado a la lista. ¿Duplicar?")) {
+        ok = true;
+      }
+    }
+
+    if (ok) {
       this.list.push(e);
       this.callback();
     }
   },
 
   remove(e) {
-    this.list = this.list.filter((value) => value !== e);
+    this.list = this.list.filter((value, k) => k !== Number(e));
     this.callback();
   },
 
@@ -157,8 +167,8 @@ document.addEventListener("click", (e) => {
 
   // Si el click sucede en la lista de presupuestos
   if (checkBudgetClick(e)) {
-    const rowID = e.srcElement.parentElement.getAttribute("id");
-    currentBudget.remove(rowID);
+    const rowN = e.srcElement.parentElement.getAttribute("n");
+    currentBudget.remove(rowN);
   }
 });
 
@@ -167,7 +177,7 @@ currentBudget.onChange(() => {
   let txt = "";
   let total = 0;
 
-  currentBudget.list.forEach((value) => {
+  currentBudget.list.forEach((value, k) => {
     const currentItem = db[value];
     let asFonasa = false;
     let type = "";
@@ -188,7 +198,7 @@ currentBudget.onChange(() => {
     total += Number(price);
 
     txt += `
-      <tr id="${value}">
+      <tr id="${value}" n="${k}">
         <td style="width: 5%">${type}</td>
         <td style="width: 75%;text-align: left;">${currentItem.EXAMEN}</td>
         <td style="width: 20%">${toFormat(price)}</td>
