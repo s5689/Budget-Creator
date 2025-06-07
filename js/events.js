@@ -8,6 +8,7 @@ const detailsTableHTML = document.querySelector("#details tbody");
 const budgetTableHTML = document.querySelector("#budgetContainer table");
 const payTypeHTML = document.querySelector("#budgetBottom #payType");
 const payTotalHTML = document.querySelector("#budgetBottom #payTotal h1");
+const itemCountHTML = document.querySelector("#budgetBottom #itemCount h1");
 const printButton = document.getElementById("budgetPrint");
 
 const currentBudget = {
@@ -208,6 +209,9 @@ currentBudget.onChange(() => {
 
   budgetTableHTML.innerHTML = txt;
   payTotalHTML.innerHTML = toFormat(String(total));
+
+  // Cantidad
+  itemCountHTML.innerHTML = currentBudget.list.length;
 });
 
 // Cambio al tipo de pago
