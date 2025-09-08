@@ -4115,4 +4115,37 @@ export const vocalArray = [
   "ų",
 ];
 
+export const loremArray = [
+  "Lorem",
+  "ipsum",
+  "dolor",
+  "sit",
+  "amet",
+  "consectetur",
+  "adipisicing",
+  "elit",
+  "Ullam",
+  "ipsa",
+  "aliquam",
+  "debitis",
+  "possimus",
+  "reiciendis",
+  "minima",
+  "Quia",
+  "animi",
+  "commodi",
+  "vero",
+  "repellendus",
+  "libero",
+  "rem",
+  "quis",
+  "quod",
+  "consectetur",
+  "repudiandae",
+  "nulla",
+  "assumenda",
+  "veniam",
+  "facilis",
+];
+
 export const db = [];

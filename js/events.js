@@ -57,188 +57,189 @@ const currentBudget = {
   },
 };
 
-// Search Bar Event
-searchBar.addEventListener("keyup", (e) => {
-  const currentValue = searchBar.value;
-  const foundList = [];
+export default function events() {
+  // Search Bar Event
+  searchBar.addEventListener("keyup", (e) => {
+    const currentValue = searchBar.value;
+    const foundList = [];
 
-  // Realizar busqueda solo si hay algun caracter
-  if (currentValue !== "") {
-    db.forEach((value, k) => {
-      if (checkValue(value)) {
-        foundList.push({
-          id: k,
-          data: [
-            { codigo: value.CODIGO },
-            { examen: value.EXAMEN },
-            { fonasa: toFormat(value["Copago FNS"]) },
-            { particular: toFormat(value.PART) },
-          ],
-        });
-      }
-    });
+    // Realizar busqueda solo si hay algun caracter
+    if (currentValue !== "") {
+      db.forEach((value, k) => {
+        if (checkValue(value)) {
+          foundList.push({
+            id: k,
+            data: [
+              { codigo: value.CODIGO },
+              { examen: value.EXAMEN },
+              { fonasa: toFormat(value["Copago FNS"]) },
+              { particular: toFormat(value.PART) },
+            ],
+          });
+        }
+      });
 
-    // Al presionar Enter en la barra de Busqueda
-    // Agregar el elemento encontrado y borrar la barra de busqueda
-    if (e.key === "Enter" && foundList.length === 1) {
-      resultsHTML.children[0].children[0].children[0].click();
-      searchBar.value = "";
-      foundList.pop(0);
-    }
-
-    function checkValue(e) {
-      // Si el nombre del examen coincide
-      if (e.EXAMEN.toLowerCase().includes(currentValue.toLowerCase())) {
-        return true;
-
-        // O si el codigo coincide, mostrar en la lista
-      } else if (e.CODIGO.includes(currentValue)) {
-        return true;
-        // O si la observacion coincide, mostrar en la lista
-      } else if (e.OBSERVACIONES.toLowerCase().includes(currentValue)) {
-        return true;
+      // Al presionar Enter en la barra de Busqueda
+      // Agregar el elemento encontrado y borrar la barra de busqueda
+      if (e.key === "Enter" && foundList.length === 1) {
+        resultsHTML.children[0].children[0].children[0].click();
+        searchBar.value = "";
+        foundList.pop(0);
       }
 
-      return false;
+      function checkValue(e) {
+        // Si el nombre del examen coincide
+        if (e.EXAMEN.toLowerCase().includes(currentValue.toLowerCase())) {
+          return true;
+
+          // O si el codigo coincide, mostrar en la lista
+        } else if (e.CODIGO.includes(currentValue)) {
+          return true;
+          // O si la observacion coincide, mostrar en la lista
+        } else if (e.OBSERVACIONES.toLowerCase().includes(currentValue)) {
+          return true;
+        }
+
+        return false;
+      }
     }
-  }
 
-  // Generar lista con los resultados obtenidos
-  let txt = "";
-  foundList.forEach((value) => {
-    const dataList = value.data;
+    // Generar lista con los resultados obtenidos
+    let txt = "";
+    foundList.forEach((value) => {
+      const dataList = value.data;
 
-    txt += `<tr id="${value.id}">`;
-    dataList.forEach((valua) => {
-      txt += `<td class="${Object.keys(valua)}">${Object.values(valua)}</td>`;
+      txt += `<tr id="${value.id}">`;
+      dataList.forEach((valua) => {
+        txt += `<td class="${Object.keys(valua)}">${Object.values(valua)}</td>`;
+      });
+      txt += "</tr>";
     });
-    txt += "</tr>";
+
+    resultsHTML.innerHTML = txt;
   });
 
-  resultsHTML.innerHTML = txt;
-});
+  // Wipe Budget
+  wipeBudgetButton.addEventListener("click", () => {
+    currentBudget.wipe();
+    searchBar.value = "";
+    resultsHTML.innerHTML = "";
+  });
 
-// Wipe Budget
-wipeBudgetButton.addEventListener("click", () => {
-  currentBudget.wipe();
-  searchBar.value = "";
-  resultsHTML.innerHTML = "";
-});
+  // Details Right Click
+  document.addEventListener("contextmenu", (e) => {
+    const currentRow = e.srcElement.parentElement;
 
-// Details Right Click
-document.addEventListener("contextmenu", (e) => {
-  const currentRow = e.srcElement.parentElement;
+    // Proceder si el click fue dentro de la lista
+    if (checkResultsClick(e) || checkBudgetClick(e)) {
+      e.preventDefault();
+      detailsHTML.setAttribute("show", "");
 
-  // Proceder si el click fue dentro de la lista
-  if (checkResultsClick(e) || checkBudgetClick(e)) {
-    e.preventDefault();
-    detailsHTML.setAttribute("show", "");
+      const rowID = currentRow.getAttribute("id");
+      let txt = "<tr>";
 
-    const rowID = currentRow.getAttribute("id");
-    let txt = "<tr>";
+      // Recorrer los datos seleccionados
+      Object.values(db[rowID]).forEach((value, k) => {
+        let tempValue = value;
 
-    // Recorrer los datos seleccionados
-    Object.values(db[rowID]).forEach((value, k) => {
-      let tempValue = value;
+        // Dar formato a los Precios
+        if (k === 3 || k === 4) {
+          tempValue = toFormat(value);
+        }
 
-      // Dar formato a los Precios
-      if (k === 3 || k === 4) {
-        tempValue = toFormat(value);
+        txt += `<td>${tempValue}</td>`;
+      });
+
+      txt += "</tr>";
+
+      detailsTableHTML.innerHTML = txt;
+    }
+  });
+
+  // Al dar click
+  document.addEventListener("click", (e) => {
+    // Hide details
+    detailsHTML.removeAttribute("show");
+
+    // Si el click sucede en la lista de examenes
+    if (checkResultsClick(e)) {
+      const rowID = e.srcElement.parentElement.getAttribute("id");
+      currentBudget.add(rowID);
+    }
+
+    // Si el click sucede en la lista de presupuestos
+    if (checkBudgetClick(e)) {
+      const rowN = e.srcElement.parentElement.getAttribute("n");
+      currentBudget.remove(rowN);
+    }
+  });
+
+  // Al realizar cambios en la lista de presupuestos
+  currentBudget.onChange(() => {
+    let txt = "";
+    let total = 0;
+
+    currentBudget.list.forEach((value, k) => {
+      const currentItem = db[value];
+      let asFonasa = false;
+      let type = "";
+      let price = "";
+
+      if (currentItem["Copago FNS"] !== "") {
+        asFonasa = true;
       }
 
-      txt += `<td>${tempValue}</td>`;
-    });
+      if (currentBudget.type === "fonasa" && asFonasa) {
+        type = "F";
+        price = currentItem["Copago FNS"];
+      } else {
+        type = "P";
+        price = currentItem.PART;
+      }
 
-    txt += "</tr>";
+      total += Number(price);
 
-    detailsTableHTML.innerHTML = txt;
-  }
-});
-
-// Al dar click
-document.addEventListener("click", (e) => {
-  // Hide details
-  detailsHTML.removeAttribute("show");
-
-  // Si el click sucede en la lista de examenes
-  if (checkResultsClick(e)) {
-    const rowID = e.srcElement.parentElement.getAttribute("id");
-    currentBudget.add(rowID);
-  }
-
-  // Si el click sucede en la lista de presupuestos
-  if (checkBudgetClick(e)) {
-    const rowN = e.srcElement.parentElement.getAttribute("n");
-    currentBudget.remove(rowN);
-  }
-});
-
-// Al realizar cambios en la lista de presupuestos
-currentBudget.onChange(() => {
-  let txt = "";
-  let total = 0;
-
-  currentBudget.list.forEach((value, k) => {
-    const currentItem = db[value];
-    let asFonasa = false;
-    let type = "";
-    let price = "";
-
-    if (currentItem["Copago FNS"] !== "") {
-      asFonasa = true;
-    }
-
-    if (currentBudget.type === "fonasa" && asFonasa) {
-      type = "F";
-      price = currentItem["Copago FNS"];
-    } else {
-      type = "P";
-      price = currentItem.PART;
-    }
-
-    total += Number(price);
-
-    txt += `
+      txt += `
       <tr id="${value}" n="${k}">
         <td style="width: 5%">${type}</td>
         <td style="width: 75%;text-align: left;">${currentItem.EXAMEN}</td>
         <td style="width: 20%">${toFormat(price)}</td>
       </tr>
     `;
+    });
+
+    budgetTableHTML.innerHTML = txt;
+    payTotalHTML.innerHTML = toFormat(String(total));
+
+    // Cantidad
+    itemCountHTML.innerHTML = currentBudget.list.length;
   });
 
-  budgetTableHTML.innerHTML = txt;
-  payTotalHTML.innerHTML = toFormat(String(total));
+  // Cambio al tipo de pago
+  payTypeHTML.addEventListener("change", (e) => {
+    currentBudget.type = e.srcElement.id;
+  });
 
-  // Cantidad
-  itemCountHTML.innerHTML = currentBudget.list.length;
-});
+  // Imprimir Presupuesto
+  printButton.addEventListener("click", () => {
+    if (currentBudget.list.length !== 0) {
+      let txt = "";
 
-// Cambio al tipo de pago
-payTypeHTML.addEventListener("change", (e) => {
-  currentBudget.type = e.srcElement.id;
-});
+      // Recorrer todo el presupuesto actual
+      for (let k = 0; k < currentBudget.list.length; k++) {
+        const currentRow = budgetTableHTML.children[0].children[k];
 
-// Imprimir Presupuesto
-printButton.addEventListener("click", () => {
-  if (currentBudget.list.length !== 0) {
-    let txt = "";
-
-    // Recorrer todo el presupuesto actual
-    for (let k = 0; k < currentBudget.list.length; k++) {
-      const currentRow = budgetTableHTML.children[0].children[k];
-
-      txt += `
+        txt += `
         <tr>
           <td>${currentRow.children[1].innerHTML}</td>
           <td>${currentRow.children[2].innerHTML}</td>
         </tr>
       `;
-    }
+      }
 
-    const printPage = window.open();
+      const printPage = window.open();
 
-    printPage.document.write(`
+      printPage.document.write(`
       <!DOCTYPE html>
       <html lang="es">
         <head>
@@ -319,77 +320,78 @@ printButton.addEventListener("click", () => {
         </body>
       </html>
     `);
-    printPage.print();
-    printPage.close();
-  }
-});
+      printPage.print();
+      printPage.close();
+    }
+  });
 
-function toFormat(e) {
-  const size = e.length;
-  let result = "";
+  function toFormat(e) {
+    const size = e.length;
+    let result = "";
 
-  // Si no hay ningun valor, mostrar ---
-  if (size === 0) {
-    result = "---";
-  }
-  // De lo contrario, aplicar formato
-  else {
-    let k = 0;
-    let i = 0;
+    // Si no hay ningun valor, mostrar ---
+    if (size === 0) {
+      result = "---";
+    }
+    // De lo contrario, aplicar formato
+    else {
+      let k = 0;
+      let i = 0;
 
-    // Detectar donde aplicar el punto.
-    while (true) {
-      if (k !== 3) {
-        result += e.charAt(size - i - 1);
+      // Detectar donde aplicar el punto.
+      while (true) {
+        if (k !== 3) {
+          result += e.charAt(size - i - 1);
 
-        i++;
-        k++;
-      } else {
-        result += ".";
-        k = 0;
+          i++;
+          k++;
+        } else {
+          result += ".";
+          k = 0;
+        }
+
+        if (i === size) {
+          break;
+        }
       }
 
-      if (i === size) {
-        break;
+      // Invertir el resultado
+      let temp = "";
+      for (let j = result.length - 1; j >= 0; j--) {
+        temp += result[j];
       }
+
+      result = "$" + temp;
     }
 
-    // Invertir el resultado
-    let temp = "";
-    for (let j = result.length - 1; j >= 0; j--) {
-      temp += result[j];
-    }
-
-    result = "$" + temp;
+    return result;
   }
 
-  return result;
-}
+  function checkResultsClick(e) {
+    try {
+      const currentRow = e.srcElement.parentElement;
 
-function checkResultsClick(e) {
-  try {
-    const currentRow = e.srcElement.parentElement;
+      if (currentRow.parentElement.parentElement.parentElement.getAttribute("id") === "selectContainer") {
+        return true;
+      }
 
-    if (currentRow.parentElement.parentElement.parentElement.getAttribute("id") === "selectContainer") {
-      return true;
+      return false;
+    } catch (error) {
+      return false;
     }
-
-    return false;
-  } catch (error) {
-    return false;
   }
-}
 
-function checkBudgetClick(e) {
-  try {
-    const currentRow = e.srcElement.parentElement;
+  function checkBudgetClick(e) {
+    try {
+      const currentRow = e.srcElement.parentElement;
 
-    if (currentRow.parentElement.parentElement.parentElement.getAttribute("id") === "budgetContainer") {
-      return true;
+      if (currentRow.parentElement.parentElement.parentElement.getAttribute("id") === "budgetContainer") {
+        return true;
+      }
+
+      return false;
+    } catch (error) {
+      return false;
     }
-
-    return false;
-  } catch (error) {
-    return false;
   }
 }
